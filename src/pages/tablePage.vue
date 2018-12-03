@@ -202,7 +202,7 @@
                 prop:"applyTime",
                 label:"申请时间",
               },{
-                prop:"billRepaymentTime",
+                prop:"loanTime",
                 label:"放款时间",
               },{
                 prop:"",
