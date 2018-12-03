@@ -15,15 +15,15 @@
               <el-form-item label="密码" prop="password">
                 <el-input v-model="ruleForm.password" type='password'  placeholder='请输入密码'></el-input>
               </el-form-item>
-              <el-form-item prop="valideCode" label='验证码' class='valid-input'>
-              <!-- 注意：prop与input绑定的值一定要一致，否则验证规则中的value会报undefined，因为value即为绑定的input输入值 -->
-              <el-input    v-model="ruleForm.valideCode" placeholder="请输入验证码" class="identifyinput">
-                <template slot="append">
-                  <img  :src="imgUrl" @click='imgFun'>
-                </template>
-              </el-input>
+              <!--<el-form-item prop="valideCode" label='验证码' class='valid-input'>-->
+              <!--&lt;!&ndash; 注意：prop与input绑定的值一定要一致，否则验证规则中的value会报undefined，因为value即为绑定的input输入值 &ndash;&gt;-->
+              <!--<el-input    v-model="ruleForm.valideCode" placeholder="请输入验证码" class="identifyinput">-->
+                <!--<template slot="append">-->
+                  <!--<img  :src="imgUrl" @click='imgFun'>-->
+                <!--</template>-->
+              <!--</el-input>-->
 
-             </el-form-item>
+             <!--</el-form-item>-->
               <div>
                 <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
                 <router-link to='./editpassword'>
@@ -61,9 +61,9 @@
                 password: [
                   { required: true, message: '请输入密码', trigger: 'blur' }
                 ],
-                valideCode: [
-                  { required: true, message: '请输入验证码', trigger: 'blur' }
-                ],
+                // valideCode: [
+                //   { required: true, message: '请输入验证码', trigger: 'blur' }
+                // ],
               },
             }
         },

@@ -46,7 +46,7 @@
             <el-input></el-input>
             <span style='margin-left: 20px;'>电话：</span>
             <el-input></el-input>
-            <el-button type='primary'>搜索</el-button>
+            <el-button type='primary' @click='applySearch'>搜索</el-button>
           </div>
           <el-table
             :data="applicData"
@@ -245,24 +245,69 @@
               vm.initTable2(1,10);
             }
           },
+          //延期
+          postpone(index,row){
+            let vm=this;
+            vm.$confirm('确认要延期吗', '延期', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }).then(()=>{
+              vm.$api.post("api/bill/delay/"+row.id,"",function ({data}) {
+                if(data.code==20){
+                  vm.$message.success("延期成功");
+                  vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
+                }
+              })
+            }).catch(() => {
+              // 取消的时候对应的函数
+              // vm.$set(vm.tableLeft.tableData)
+              // fn();
+              vm.$message.info('已取消');
+            });
+          },
           loanMoney(index,row){
             let vm=this;
             console.log(row);
-            vm.$api.post("api/bill/"+row.id+"/pass","",function ({data}) {
-              if(data.code==20){
-                vm.$message.success("放款成功");
-                vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
-              }
-            })
+            vm.$confirm('确认放款吗', '放款', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }).then(()=>{
+              vm.$api.post("api/bill/"+row.id+"/pass","",function ({data}) {
+                if(data.code==20){
+                  vm.$message.success("放款成功");
+                  vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
+                }
+              })
+            }).catch(() => {
+              // 取消的时候对应的函数
+              // vm.$set(vm.tableLeft.tableData)
+              // fn();
+              vm.$message.info('已取消');
+            });
+
           },
           repayment(index,row){
             let vm=this;
-            vm.$api.post("api/bill/"+row.id+"/end","",function ({data}) {
-              if(data.code==20){
-                vm.$message.success("还款成功");
-                vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
-              }
-            })
+            vm.$confirm('确认要还款吗', '还款', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }).then(()=>{
+              vm.$api.post("api/bill/"+row.id+"/end","",function ({data}) {
+                if(data.code==20){
+                  vm.$message.success("还款成功");
+                  vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
+                }
+              })
+            }).catch(() => {
+              // 取消的时候对应的函数
+              // vm.$set(vm.tableLeft.tableData)
+              // fn();
+              vm.$message.info('已取消');
+            });
+
 
           },
           deleteUser(index,row){
@@ -313,7 +358,7 @@
             let vm=this;
             let obj={
               "realName.contains":vm.realName,
-              "tel.contains":vm.tel,
+              "tel":vm.tel,
               page:page-1,
               size:size
             };
@@ -321,7 +366,7 @@
               delete obj["realName.contains"]
             }
             if(vm.tel==""){
-              delete obj["tel.contains"]
+              delete obj["tel"]
             }
             vm.$api.get("api/user/list",obj,function ({data}) {
               vm.userData=data.data.list;
@@ -339,7 +384,7 @@
             let vm=this;
             let obj={
               "realName.contains":vm.realName,
-              "tel.contains":vm.tel,
+              "tel":vm.tel,
               page:page-1,
               size:size,
               sort:"createdTime,desc"
@@ -348,7 +393,7 @@
               delete obj["realName.contains"]
             }
             if(vm.tel==""){
-              delete obj["tel.contains"]
+              delete obj["tel"]
             }
             vm.$api.get("api/admin/loan/history",obj,function ({data}) {
               vm.applicData=data.data.list;
@@ -365,6 +410,10 @@
           searchFun(){
             let vm=this;
             this.initTable1(1,vm.page1.pageInfo.pageSize);
+          },
+          applySearch(){
+            let vm=this;
+            this.initTable2(1,vm.page2.pageInfo.pageSize);
           },
           handleSizeChange(value){
             this.initTable1(1,value)
