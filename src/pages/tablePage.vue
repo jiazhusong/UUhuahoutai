@@ -204,10 +204,7 @@
               },{
                 prop:"loanTime",
                 label:"放款时间",
-              },{
-                prop:"",
-                label:"操作",
-              },],
+              }],
               userData:[],
               applicData:[],
             }
