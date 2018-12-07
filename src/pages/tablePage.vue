@@ -43,9 +43,9 @@
         <el-tab-pane label="贷款申请" name="second">
           <div style='margin-left: 20px;margin-bottom: 20px;'>
             <span>姓名：</span>
-            <el-input></el-input>
+            <el-input v-model='realName'></el-input>
             <span style='margin-left: 20px;'>电话：</span>
-            <el-input></el-input>
+            <el-input v-model='tel'></el-input>
             <el-button type='primary' @click='applySearch'>搜索</el-button>
           </div>
           <el-table
@@ -222,6 +222,8 @@
         methods: {
           handleClick(value){
             let vm=this;
+            vm.realName="";
+            vm.tel="";
             if(vm.activeName=="first"){
               vm.$router.push({
                 path:"/infoTable",
