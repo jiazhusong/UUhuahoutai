@@ -187,6 +187,10 @@
                 prop:"bill",
                 label:"申请金额",
               },{
+                prop:"penalty",
+                label:"逾期滞纳金",
+              },
+                {
                 prop:"loanDay",
                 label:"申请周期",
               },{
