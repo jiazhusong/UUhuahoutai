@@ -8,128 +8,13 @@
       <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
 
         <el-tab-pane label="用户管理" name="first">
-          <div style='margin-left: 20px;margin-bottom: 20px;'>
-            <span>姓名：</span>
-            <el-input v-model='realName'></el-input>
-            <span style='margin-left: 20px;'>电话：</span>
-            <el-input v-model='tel'></el-input>
-            <el-button type='primary' @click='searchFun'>搜索</el-button>
-          </div>
-          <el-table
-            :data="userData"
-            style="width: 100%">
-          <template v-for='item in userTableHeader'>
-            <el-table-column
-              :prop="item.prop"
-              :label="item.label"
-            >
-            </el-table-column>
-          </template>
-            <el-table-column
-              prop=""
-              label="操作"
-              width=""
-            >
-              <template slot-scope="scope">
-                <el-button
-                  size="mini"
-                  type='primary'
-                  @click.native='remarkUser(scope.$index,scope.row,$event)'>备注</el-button>
-                <el-button
-                  size="mini"
-                  type='info'
-                  @click.native='deleteUser(scope.$index,scope.row,$event)'>删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-          <pageInfoTip :options='page1'></pageInfoTip>
+          <userList  v-if='activeName=="first"'></userList>
         </el-tab-pane>
         <el-tab-pane label="贷款申请" name="second">
-          <div style='margin-left: 20px;margin-bottom: 20px;'>
-            <span>姓名：</span>
-            <el-input v-model='realName'></el-input>
-            <span style='margin-left: 20px;'>电话：</span>
-            <el-input v-model='tel'></el-input>
-            <el-select v-model='status'>
-              <el-option label='全部' value=''></el-option>
-              <el-option label='未审核' value='PENDING'></el-option>
-              <el-option label='审核通过' value='PASS'></el-option>
-              <el-option label='结束' value='END'></el-option>
-            </el-select>
-            <el-button type='primary' @click='applySearch'>搜索</el-button>
-          </div>
-          <el-table
-            :data="applicData"
-            style="width: 100%">
-            <template v-for='item in applicTableHeader'>
-              <el-table-column
-                :prop="item.prop"
-                :label="item.label"
-              >
-              </el-table-column>
-            </template>
-            <el-table-column
-              prop=""
-              label="操作"
-              width=""
-            >
-              <template slot-scope="scope">
-                  <el-button
-                    size="mini"
-                    type='primary'
-                    v-if='scope.row.status=="PENDING"'
-                    @click.native='loanMoney(scope.$index,scope.row,$event)'>放款</el-button>
-                  <el-button
-                    size="mini"
-                    type='danger'
-                    v-if='scope.row.status=="PASS"'
-                    @click.native='repayment(scope.$index,scope.row,$event)'>还款</el-button>
-                  <el-button
-                    size="mini"
-                    type='info'
-                    @click.native='deleteInfo(scope.$index,scope.row,$event)'>删除</el-button>
-                </template>
-            </el-table-column>
-          </el-table>
-          <pageInfoTip :options='page2'></pageInfoTip>
+          <applyList  v-if='activeName=="second"'></applyList>
         </el-tab-pane>
         <el-tab-pane label="逾期账单" name="third">
-          <div style='margin-left: 20px;margin-bottom: 20px;'>
-            <span>姓名：</span>
-            <el-input v-model='realName'></el-input>
-            <span style='margin-left: 20px;'>电话：</span>
-            <el-input v-model='tel'></el-input>
-            <el-button type='primary' @click='overdueFun'>搜索</el-button>
-          </div>
-          <el-table
-            :data="overdueData"
-            style="width: 100%">
-            <template v-for='item in applicTableHeader'>
-              <el-table-column
-                :prop="item.prop"
-                :label="item.label"
-              >
-              </el-table-column>
-            </template>
-            <el-table-column
-              prop=""
-              label="操作"
-              width=""
-            >
-              <template slot-scope="scope">
-                  <el-button
-                    size="mini"
-                    type='danger'
-                    v-if='scope.row.status=="PASS"'
-                    @click.native='repayment(scope.$index,scope.row,$event)'>还款</el-button>
-                <el-button
-                  size="mini"
-                  type='info'
-                  @click.native='deleteInfo(scope.$index,scope.row,$event)'>删除</el-button>
-                </template>
-            </el-table-column>
-          </el-table>
-          <pageInfoTip :options='page3'></pageInfoTip>
+          <overBillList v-if='activeName=="third"'></overBillList>
         </el-tab-pane>
 
       </el-tabs>
@@ -138,165 +23,31 @@
 </template>
 
 <script>
+  import userList from "@/pages/components/userList"
+  import applyList from "@/pages/components/applyList"
+  import overBillList from "@/pages/components/overBillList"
   import pageInfoTip from "@/components/newPage"
     export default {
         name: "tablePage",
         components: {
-          pageInfoTip
+          pageInfoTip,
+          userList,
+          applyList,
+          overBillList,
         },
         props: [],
         data() {
             return {
-              activeName:"first",
-              realName:"",
-              tel:"",
-              status:"",
-              page1:{
-                pageInfo:{
-                  handleSizeChange(){},
-                  handleCurrentChange(){},
-                  pageSize:10,
-                  currentPage:1,
-                  total:0,
-                }
-              },
-              page2:{
-                pageInfo:{
-                  handleSizeChange(){},
-                  handleCurrentChange(){},
-                  pageSize:10,
-                  currentPage:1,
-                  total:0,
-                }
-              },
-              page3:{
-                pageInfo:{
-                  handleSizeChange(){},
-                  handleCurrentChange(){},
-                  pageSize:10,
-                  currentPage:1,
-                  total:0,
-                }
-              },
-              userTableHeader:[{
-                prop:"realName",
-                label:"姓名",
-              },{
-                prop:"tel",
-                label:"电话",
-              },{
-                prop:"password",
-                label:"密码",
-              },{
-                prop:"wechat",
-                label:"微信",
-              },{
-                prop:"qq",
-                label:"QQ",
-              },{
-                prop:"idCart",
-                label:"身份证",
-              },{
-                prop:"xxwzh",
-                label:"学信网账号",
-              },{
-                prop:"xxwmm",
-                label:"学信网密码",
-              },{
-                prop:"fqxm",
-                label:"父亲姓名",
-              },{
-                prop:"fqdh",
-                label:"父亲电话",
-              },{
-                prop:"mqxm",
-                label:"母亲姓名",
-              },{
-                prop:"mqdh",
-                label:"母亲电话",
-              },{
-                prop:"txxm",
-                label:"同学姓名",
-              },{
-                prop:"txdh",
-                label:"同学电话",
-              },{
-                prop:"familyAddress",
-                label:"通讯地址",
-              },{
-                prop:"bankAccount",
-                label:"银行账号",
-              },{
-                prop:"fhxx",
-                label:"分行信息",
-              },{
-                prop:"yysmm",
-                label:"运营商密码",
-              },{
-                prop:"remark",
-                label:"备注",
-              }],
-              applicTableHeader:[{
-                prop:"realName",
-                label:"姓名",
-              },{
-                prop:"tel",
-                label:"电话",
-              },{
-                prop:"qq",
-                label:"QQ",
-              },{
-                prop:"bill",
-                label:"申请金额",
-              },{
-                prop:"penalty",
-                label:"逾期滞纳金",
-              },
-                {
-                prop:"loanDay",
-                label:"申请周期",
-              },{
-                prop:"bankAccount",
-                label:"银行卡号",
-              },{
-                prop:"bank",
-                label:"银行",
-              },{
-                prop:"fhxx",
-                label:"分行信息",
-              },{
-                prop:"applyTime",
-                label:"申请时间",
-              },{
-                prop:"loanTime",
-                label:"放款时间",
-              }],
-              userData:[],
-              applicData:[],
-              overdueData:[],
+              activeName:"",
             }
         },
         mounted() {
           let vm=this;
           vm.activeName=vm.$router.history.current.query.active
-          if(vm.activeName=="first"){
-            vm.initTable1(1,10)
-          }else if(vm.activeName=="second"){
-            vm.initTable2(1,10)
-          }else {
-            vm.initTable3(1,10)
-          }
-
         },
         methods: {
           handleClick(value){
             let vm=this;
-            vm.realName="";
-            vm.tel="";
-            vm.status="";
-            vm.userData=[];
-              vm.applicData=[];
-              vm.overdueData=[];
             if(vm.activeName=="first"){
               vm.$router.push({
                 path:"/infoTable",
@@ -305,7 +56,6 @@
                 }
 
               })
-              vm.initTable1(1,10);
             }else if(vm.activeName=="second") {
               vm.$router.push({
                 path:"/infoTable",
@@ -314,7 +64,6 @@
                 }
 
               })
-              vm.initTable2(1,10);
             }else {
               vm.$router.push({
                 path:"/infoTable",
@@ -323,7 +72,6 @@
                 }
 
               })
-              vm.initTable3(1,10);
             }
           },
           //延期
@@ -347,242 +95,14 @@
               vm.$message.info('已取消');
             });
           },
-          loanMoney(index,row){
-            let vm=this;
-            console.log(row);
-            vm.$confirm('确认放款吗', '放款', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning',
-            }).then(()=>{
-              vm.$api.post("api/bill/"+row.id+"/pass","",function ({data}) {
-                if(data.code==20){
-                  vm.$message.success("放款成功");
-                  vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
-                }
-              })
-            }).catch(() => {
-              // 取消的时候对应的函数
-              // vm.$set(vm.tableLeft.tableData)
-              // fn();
-              vm.$message.info('已取消');
-            });
-
-          },
-          repayment(index,row){
-            let vm=this;
-            vm.$confirm('确认要还款吗', '还款', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning',
-            }).then(()=>{
-              vm.$api.post("api/bill/"+row.id+"/end","",function ({data}) {
-                if(data.code==20){
-                  vm.$message.success("还款成功");
-                  if(vm.activeName=="second"){
-                    vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
-                  }else if(vm.activeName=="third"){
-                    vm.initTable3(vm.page3.pageInfo.currentPage,vm.page3.pageInfo.pageSize);
-                  }
-
-                }
-              })
-            }).catch(() => {
-              // 取消的时候对应的函数
-              // vm.$set(vm.tableLeft.tableData)
-              // fn();
-              vm.$message.info('已取消');
-            });
 
 
-          },
-          remarkUser(index,row){
-            let vm=this;
-            vm.$api.put("api/user/"+row.id+"/remark",{
 
-            },({data})=>{
-              if(data.code==20){
-                vm.$message.success("删除成功");
-                vm.initTable1(vm.page1.pageInfo.currentPage,vm.page1.pageInfo.pageSize);
-              }else {
-                vm.$message.error(data.message);
-              }
-            })
-          },
-          deleteUser(index,row){
-            let vm=this;
-            vm.$confirm('确认要删除吗?删除将删除用户所有数据', '删除', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning',
-            }).then(() => {
-              vm.$api.delete("api/user/"+row.id,"",({data})=>{
-                if(data.code==20){
-                  vm.$message.success("删除成功");
-                  vm.initTable1(vm.page1.pageInfo.currentPage,vm.page1.pageInfo.pageSize);
-                }else {
-                  vm.$message.error(data.message);
-                }
-              })
-            }).catch(() => {
-              // 取消的时候对应的函数
-              // vm.$set(vm.tableLeft.tableData)
-              // fn();
-              vm.$message.info('已取消');
-            });
-          },
 
-          deleteInfo(index,row){
-            let vm=this;
-            vm.$confirm('确认要删除吗?', '删除', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning',
-            }).then(() => {
-              vm.$api.delete("api/admin/bill/"+row.id,"",({data})=>{
-                if(data.code==20){
-                  vm.$message.success("删除成功");
-                  if(vm.activeName=="second"){
-                    vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
-                  }else if(vm.activeName=="third"){
-                    vm.initTable3(vm.page3.pageInfo.currentPage,vm.page3.pageInfo.pageSize);
-                  }
-
-                }else {
-                  vm.$message.error(data.message);
-                }
-              })
-            }).catch(() => {
-              // 取消的时候对应的函数
-              // vm.$set(vm.tableLeft.tableData)
-              // fn();
-              vm.$message.info('已取消');
-            });
-          },
-          initTable1(page,size){
-            let vm=this;
-            let obj={
-              "realName.contains":vm.realName,
-              "tel.equals":vm.tel,
-              page:page-1,
-              size:size
-            };
-            if(vm.realName==""){
-              delete obj["realName.contains"]
-            }
-            if(vm.tel==""){
-              delete obj["tel.equals"]
-            }
-            vm.$api.get("api/user/list",obj,function ({data}) {
-              vm.userData=data.data.list;
-              vm.page1.pageInfo={
-                pageSize:size,
-                currentPage:page,
-                total:data.data.total,
-                handleSizeChange:vm.handleSizeChange,
-                handleCurrentChange:vm.handleCurrentChange,
-
-              };
-            })
-          },
-          initTable2(page,size){
-            let vm=this;
-            let obj={
-              "realName.contains":vm.realName,
-              "tel.equals":vm.tel,
-              page:page-1,
-              size:size,
-              sort:"createdTime,desc",
-              "status.equals":vm.status
-            };
-            if(vm.realName==""){
-              delete obj["realName.contains"]
-            }
-            if(vm.tel==""){
-              delete obj["tel.equals"]
-            }
-            if(vm.status==""){
-              delete obj["status.equals"]
-            }
-            vm.$api.get("api/admin/loan/history",obj,function ({data}) {
-              vm.applicData=data.data.list;
-              vm.page2.pageInfo={
-                pageSize:size,
-                currentPage:page,
-                total:data.data.total,
-                handleSizeChange:vm.handleSizeChange2,
-                handleCurrentChange:vm.handleCurrentChange2,
-
-              };
-            })
-          },
-          initTable3(page,size){
-            let vm=this;
-            let obj={
-              "realName.contains":vm.realName,
-              "tel.equals":vm.tel,
-              page:page-1,
-              size:size,
-              sort:"createdTime,desc"
-            };
-            if(vm.realName==""){
-              delete obj["realName.contains"]
-            }
-            if(vm.tel==""){
-              delete obj["tel.equals"]
-            }
-            vm.$api.get("api/admin/loan/overdue/history",obj,function ({data}) {
-              vm.overdueData=data.data.list;
-              vm.page3.pageInfo={
-                pageSize:size,
-                currentPage:page,
-                total:data.data.total,
-                handleSizeChange:vm.handleSizeChange3,
-                handleCurrentChange:vm.handleCurrentChange3,
-
-              };
-            })
-          },
-          searchFun(){
-            let vm=this;
-            this.initTable1(1,vm.page1.pageInfo.pageSize);
-          },
-          applySearch(){
-            let vm=this;
-            this.initTable2(1,vm.page2.pageInfo.pageSize);
-          },
-          //逾期账单搜索
-          overdueFun(){
-            let vm=this;
-            this.initTable3(1,vm.page3.pageInfo.pageSize);
-          },
-          handleSizeChange(value){
-            this.initTable1(1,value)
-          },
-          handleCurrentChange(value){
-            let vm=this;
-            this.initTable1(value,vm.page1.pageInfo.pageSize)
-          },
-          handleSizeChange2(value){
-            this.initTable2(1,value)
-          },
-          handleCurrentChange2(value){
-            let vm=this;
-            this.initTable2(value,vm.page3.pageInfo.pageSize)
-          },
-          handleSizeChange3(value){
-            this.initTable3(1,value)
-          },
-          handleCurrentChange3(value){
-            let vm=this;
-            this.initTable3(value,vm.page3.pageInfo.pageSize)
-          }
         }
     }
 </script>
 
 <style scoped lang='less'>
-  .el-input{
-    width: 200px;
-  }
+
 </style>
