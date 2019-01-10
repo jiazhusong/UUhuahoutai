@@ -33,6 +33,10 @@
               <template slot-scope="scope">
                 <el-button
                   size="mini"
+                  type='primary'
+                  @click.native='remarkUser(scope.$index,scope.row,$event)'>备注</el-button>
+                <el-button
+                  size="mini"
                   type='info'
                   @click.native='deleteUser(scope.$index,scope.row,$event)'>删除</el-button>
               </template>
@@ -46,6 +50,12 @@
             <el-input v-model='realName'></el-input>
             <span style='margin-left: 20px;'>电话：</span>
             <el-input v-model='tel'></el-input>
+            <el-select v-model='status'>
+              <el-option label='全部' value=''></el-option>
+              <el-option label='未审核' value='PENDING'></el-option>
+              <el-option label='审核通过' value='PASS'></el-option>
+              <el-option label='结束' value='END'></el-option>
+            </el-select>
             <el-button type='primary' @click='applySearch'>搜索</el-button>
           </div>
           <el-table
@@ -83,8 +93,47 @@
           </el-table>
           <pageInfoTip :options='page2'></pageInfoTip>
         </el-tab-pane>
+        <el-tab-pane label="逾期账单" name="third">
+          <div style='margin-left: 20px;margin-bottom: 20px;'>
+            <span>姓名：</span>
+            <el-input v-model='realName'></el-input>
+            <span style='margin-left: 20px;'>电话：</span>
+            <el-input v-model='tel'></el-input>
+            <el-button type='primary' @click='overdueFun'>搜索</el-button>
+          </div>
+          <el-table
+            :data="overdueData"
+            style="width: 100%">
+            <template v-for='item in applicTableHeader'>
+              <el-table-column
+                :prop="item.prop"
+                :label="item.label"
+              >
+              </el-table-column>
+            </template>
+            <el-table-column
+              prop=""
+              label="操作"
+              width=""
+            >
+              <template slot-scope="scope">
+                  <el-button
+                    size="mini"
+                    type='danger'
+                    v-if='scope.row.status=="PASS"'
+                    @click.native='repayment(scope.$index,scope.row,$event)'>还款</el-button>
+                <el-button
+                  size="mini"
+                  type='info'
+                  @click.native='deleteInfo(scope.$index,scope.row,$event)'>删除</el-button>
+                </template>
+            </el-table-column>
+          </el-table>
+          <pageInfoTip :options='page3'></pageInfoTip>
+        </el-tab-pane>
 
       </el-tabs>
+
     </div>
 </template>
 
@@ -101,6 +150,7 @@
               activeName:"first",
               realName:"",
               tel:"",
+              status:"",
               page1:{
                 pageInfo:{
                   handleSizeChange(){},
@@ -111,6 +161,15 @@
                 }
               },
               page2:{
+                pageInfo:{
+                  handleSizeChange(){},
+                  handleCurrentChange(){},
+                  pageSize:10,
+                  currentPage:1,
+                  total:0,
+                }
+              },
+              page3:{
                 pageInfo:{
                   handleSizeChange(){},
                   handleCurrentChange(){},
@@ -173,7 +232,10 @@
               },{
                 prop:"yysmm",
                 label:"运营商密码",
-              },],
+              },{
+                prop:"remark",
+                label:"备注",
+              }],
               applicTableHeader:[{
                 prop:"realName",
                 label:"姓名",
@@ -211,6 +273,7 @@
               }],
               userData:[],
               applicData:[],
+              overdueData:[],
             }
         },
         mounted() {
@@ -218,8 +281,10 @@
           vm.activeName=vm.$router.history.current.query.active
           if(vm.activeName=="first"){
             vm.initTable1(1,10)
-          }else {
+          }else if(vm.activeName=="second"){
             vm.initTable2(1,10)
+          }else {
+            vm.initTable3(1,10)
           }
 
         },
@@ -228,6 +293,10 @@
             let vm=this;
             vm.realName="";
             vm.tel="";
+            vm.status="";
+            vm.userData=[];
+              vm.applicData=[];
+              vm.overdueData=[];
             if(vm.activeName=="first"){
               vm.$router.push({
                 path:"/infoTable",
@@ -237,7 +306,7 @@
 
               })
               vm.initTable1(1,10);
-            }else {
+            }else if(vm.activeName=="second") {
               vm.$router.push({
                 path:"/infoTable",
                 query:{
@@ -246,6 +315,15 @@
 
               })
               vm.initTable2(1,10);
+            }else {
+              vm.$router.push({
+                path:"/infoTable",
+                query:{
+                  active:"third"
+                }
+
+              })
+              vm.initTable3(1,10);
             }
           },
           //延期
@@ -301,7 +379,12 @@
               vm.$api.post("api/bill/"+row.id+"/end","",function ({data}) {
                 if(data.code==20){
                   vm.$message.success("还款成功");
-                  vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
+                  if(vm.activeName=="second"){
+                    vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
+                  }else if(vm.activeName=="third"){
+                    vm.initTable3(vm.page3.pageInfo.currentPage,vm.page3.pageInfo.pageSize);
+                  }
+
                 }
               })
             }).catch(() => {
@@ -312,6 +395,19 @@
             });
 
 
+          },
+          remarkUser(index,row){
+            let vm=this;
+            vm.$api.put("api/user/"+row.id+"/remark",{
+
+            },({data})=>{
+              if(data.code==20){
+                vm.$message.success("删除成功");
+                vm.initTable1(vm.page1.pageInfo.currentPage,vm.page1.pageInfo.pageSize);
+              }else {
+                vm.$message.error(data.message);
+              }
+            })
           },
           deleteUser(index,row){
             let vm=this;
@@ -335,6 +431,7 @@
               vm.$message.info('已取消');
             });
           },
+
           deleteInfo(index,row){
             let vm=this;
             vm.$confirm('确认要删除吗?', '删除', {
@@ -345,7 +442,12 @@
               vm.$api.delete("api/admin/bill/"+row.id,"",({data})=>{
                 if(data.code==20){
                   vm.$message.success("删除成功");
-                  vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
+                  if(vm.activeName=="second"){
+                    vm.initTable2(vm.page2.pageInfo.currentPage,vm.page2.pageInfo.pageSize);
+                  }else if(vm.activeName=="third"){
+                    vm.initTable3(vm.page3.pageInfo.currentPage,vm.page3.pageInfo.pageSize);
+                  }
+
                 }else {
                   vm.$message.error(data.message);
                 }
@@ -390,13 +492,17 @@
               "tel.equals":vm.tel,
               page:page-1,
               size:size,
-              sort:"createdTime,desc"
+              sort:"createdTime,desc",
+              "status.equals":vm.status
             };
             if(vm.realName==""){
               delete obj["realName.contains"]
             }
             if(vm.tel==""){
               delete obj["tel.equals"]
+            }
+            if(vm.status==""){
+              delete obj["status.equals"]
             }
             vm.$api.get("api/admin/loan/history",obj,function ({data}) {
               vm.applicData=data.data.list;
@@ -410,6 +516,33 @@
               };
             })
           },
+          initTable3(page,size){
+            let vm=this;
+            let obj={
+              "realName.contains":vm.realName,
+              "tel.equals":vm.tel,
+              page:page-1,
+              size:size,
+              sort:"createdTime,desc"
+            };
+            if(vm.realName==""){
+              delete obj["realName.contains"]
+            }
+            if(vm.tel==""){
+              delete obj["tel.equals"]
+            }
+            vm.$api.get("api/admin/loan/overdue/history",obj,function ({data}) {
+              vm.overdueData=data.data.list;
+              vm.page3.pageInfo={
+                pageSize:size,
+                currentPage:page,
+                total:data.data.total,
+                handleSizeChange:vm.handleSizeChange3,
+                handleCurrentChange:vm.handleCurrentChange3,
+
+              };
+            })
+          },
           searchFun(){
             let vm=this;
             this.initTable1(1,vm.page1.pageInfo.pageSize);
@@ -417,6 +550,11 @@
           applySearch(){
             let vm=this;
             this.initTable2(1,vm.page2.pageInfo.pageSize);
+          },
+          //逾期账单搜索
+          overdueFun(){
+            let vm=this;
+            this.initTable3(1,vm.page3.pageInfo.pageSize);
           },
           handleSizeChange(value){
             this.initTable1(1,value)
@@ -430,7 +568,14 @@
           },
           handleCurrentChange2(value){
             let vm=this;
-            this.initTable2(value,vm.page2.pageInfo.pageSize)
+            this.initTable2(value,vm.page3.pageInfo.pageSize)
+          },
+          handleSizeChange3(value){
+            this.initTable3(1,value)
+          },
+          handleCurrentChange3(value){
+            let vm=this;
+            this.initTable3(value,vm.page3.pageInfo.pageSize)
           }
         }
     }
